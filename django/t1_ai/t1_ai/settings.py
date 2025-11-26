@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'users.apps.UsersConfig',
     'pages.apps.PagesConfig',
-    'interview.app.InterviewConfig',
+    'interview.apps.InterviewConfig',
 ]
 
 MIDDLEWARE = [

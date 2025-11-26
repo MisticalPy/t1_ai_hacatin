@@ -1086,130 +1086,171 @@ main button:hover {
 }
 
 
-
-
-
 /* Нейросеть */
-.first_main{
+.first_main {
     display: flex;
-    gap: 25px;
     flex-direction: column;
     align-items: center;
+    gap: 25px;
 }
-.neiro{
-    border-radius: 9999px;
-    width: 260px;
-    height: 260px;
-    background-color: #1DAFF7;
+
+.neiro {
     display: flex;
+    flex-direction: column;
     justify-content: center;
     gap: 50px;
-    flex-direction: column;
+    width: 260px;
+    height: 260px;
+    border-radius: 9999px;
+    background-color: #1DAFF7;
 }
-.neiro_eyes{
+
+.neiro_eyes {
     display: flex;
     flex-direction: row;
     justify-content: center;
     align-items: center;
     gap: 48px;
-    margin-bottom: 70px; /*Это отступ при ожидании должен убираться*/
+    margin-bottom: 70px; /* Это отступ при ожидании должен убираться классом */
 }
-.neiro_eye{
-    border-radius: 50px;
+
+.neiro_eye {
     width: 37px;
     height: 58px;
-    background-color: white;
+    border-radius: 50px;
+    background-color: #ffffff;
 }
-.neiro_points{
-display: flex;
-flex-direction: row;
-gap: 15px;
-justify-content: center;
-align-items: center;
+
+.neiro_points {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
 }
-.neiro_point{
-width: 35px;
-height: 35px;
-border-radius: 9999px;
-background-color: white;
-}
-/* .neiro_micro{
-    width: 120px;
-    height: 120px;
+
+.neiro_point {
+    width: 35px;
+    height: 35px;
     border-radius: 9999px;
-    background-color: #1888ff;
+    background-color: #ffffff;
+}
+
+/* Кнопка записи голоса */
+.neiro_micro {
+    position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
+    width: 120px;
+    height: 120px;
+    border-radius: 9999px;
+    background-color: #1DAFF7;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
-} */
+    cursor: pointer;
+    transition: background-color 0.5s ease, transform 0.2s ease;
+}
 
-/* Кнопка записи голоса */
-/* Основной стиль кнопки */
-        .neiro_micro {
-            width: 120px;
-            height: 120px;
-            border-radius: 9999px;
-            background-color: #1DAFF7;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
-            cursor: pointer;
-            position: relative;
-            /* Плавный переход для фона и размера кнопки */
-            transition: background-color 0.5s ease, transform 0.2s ease;
-        }
+/* Эффект сжатия при клике */
+.neiro_micro.btn-squeezing-state {
+    transform: scale(0.92);
+}
 
-        /* Эффект сжатия при клике */
-        .neiro_micro.btn-squeezing-state {
-            transform: scale(0.92);
-        }
+/* Активное состояние - изменённый цвет фона */
+.neiro_micro.btn-active-state {
+    background-color: #1888ff;
+}
 
-        /* Активное состояние - изменённый цвет фона */
-        .neiro_micro.btn-active-state {
-            background-color: #1888ff;
-        }
+/* Затемнение кнопки микрофона (disabled) */
+.neiro_micro_disabled {
+    background-color: #3e70a6;
+    cursor: not-allowed;
+    pointer-events: none;
+}
 
-        /* Контейнер для иконок с абсолютным позиционированием */
-        .neiro-icon-wrapper {
-            position: relative;
-            width: 65px;
-            height: 65px;
-        }
+/* Контейнер для иконок */
+.neiro-icon-wrapper {
+    position: relative;
+    width: 65px;
+    height: 65px;
+}
 
-        /* Общие стили для обеих иконок */
-        .neiro-icon-wrapper img {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 65px;
-            height: 65px;
-            /* Плавный переход для прозрачности и масштаба */
-            transition: opacity 0.5s ease, transform 0.5s ease;
-        }
+/* Общие стили для иконок */
+.neiro-icon-wrapper img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 65px;
+    height: 65px;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
 
-        /* Иконка микрофона - видна по умолчанию */
-        .neiro-mic-icon {
-            opacity: 1;
-            transform: scale(1);
-        }
+/* Иконка микрофона - по умолчанию видна */
+.neiro-mic-icon {
+    opacity: 1;
+    transform: scale(1);
+}
 
-        /* Иконка отправки - скрыта по умолчанию */
-        .neiro-send-icon {
-            margin-left: 3px;
-            opacity: 0;
-            transform: scale(0.5);
-        }
+/* Иконка отправки - скрыта по умолчанию */
+.neiro-send-icon {
+    margin-left: 3px;
+    opacity: 0;
+    transform: scale(0.5);
+}
 
-        /* Когда кнопка активна: микрофон исчезает и уменьшается */
-        .neiro_micro.btn-active-state .neiro-mic-icon {
-            opacity: 0;
-            transform: scale(0.5);
-        }
+/* Активное состояние: микрофон исчезает */
+.neiro_micro.btn-active-state .neiro-mic-icon {
+    opacity: 0;
+    transform: scale(0.5);
+}
 
-        /* Когда кнопка активна: стрелка появляется и увеличивается */
-        .neiro_micro.btn-active-state .neiro-send-icon {
-            opacity: 1;
-            transform: scale(1);
-        }
+/* Активное состояние: стрелка появляется */
+.neiro_micro.btn-active-state .neiro-send-icon {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Блоки с кнопками */
+.buttons_neiro {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.mairo_two {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+/* Обёртка для кнопки ввода текста */
+.button_enter_neiro_div {
+    display: flex;
+    justify-content: flex-end;
+    width: 40vw;
+}
+
+/* Обёртка для кнопки микрофона */
+.neiro_micro_div {
+    display: flex;
+    justify-content: flex-end;
+    width: 50vw;
+}
+
+/* Кнопка "Ввести текст" */
+.button_enter_neiro {
+    display: none;
+    width: 230px !important;
+    height: 62px !important;
+    border-radius: 10px !important;
+    font-size: 20px !important;
+}
+
+/* Показать кнопку "Ввести текст" */
+.button_enter_neiro_add {
+    display: block;
+}

@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<main class="first_main">
+    <div class="neiro">
+        <div class="neiro_eyes">
+            <div class="neiro_eye"></div>
+            <div class="neiro_eye"></div>
+        </div>
+        <!-- <div class="neiro_points">
+            <div class="neiro_point"></div>
+            <div class="neiro_point"></div>
+            <div class="neiro_point"></div>
+        </div> -->
+    </div>
+    <hr style="border:0;height:3px;background-color: #dddddd; margin:10px 0;width:110%;">
+    <!-- <div class="neiro_micro"><img src="/images/mace.svg" width="65" height="65" alt="icon"></div> -->
+    <div class="buttons_neiro">
+            <div style="width: 230px; height: 100%;"></div>
+            <div class="neiro_micro" id="neiroButton">
+                <div class="neiro-icon-wrapper">
+                        <!-- Иконка микрофона (видна по умолчанию) -->
+                        <img src="/images/mace.svg" width="65" height="65" class="neiro-mic-icon" alt="microphone">
+                        <!-- Иконка отправки (скрыта по умолчанию) -->
+                        <img src="/images/free-icon-send-736161.png" width="65" height="65" class="neiro-send-icon" alt="send">
+                </div>
+            </div>
+            <div style="height: 62px; width: 230px;">
+            <button class="button_enter_neiro" id="button_enter_n">Продолжить</button>
+            </div>
+    </div>
+    <hr style="border:0;height:3px;background-color: #dddddd; margin:10px 0;width:110%;">
+</main>
+
+{% endblock %}
