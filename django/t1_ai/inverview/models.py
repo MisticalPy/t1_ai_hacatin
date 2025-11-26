@@ -32,4 +32,5 @@ class Vacancy(models.Model):
         verbose_name_plural = "Вакансии"
 
 
-
+class UserMetrics(models.Model):
+    resume = models.CharField(max_length=500)

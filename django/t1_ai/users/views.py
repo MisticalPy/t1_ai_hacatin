@@ -12,7 +12,7 @@ User = get_user_model()
 
 # Create your views here.
 class UserLoginView(LoginView):
-    success_url = reverse_lazy("users:profile")
+    success_url = reverse_lazy("pages:vacancies")
     template_name = "users/auth.html"
     form_class = UserLoginForm
 
@@ -26,7 +26,7 @@ class UserLoginView(LoginView):
 class RegisterView(FormView):
     template_name = "users/auth.html"
     form_class = UserRegisterForm
-    success_url = reverse_lazy("vacancies")  # куда редирект после регистрации
+    success_url = reverse_lazy("pages:vacancies")  # куда редирект после регистрации
 
     def form_valid(self, form):
         user = form.save()
