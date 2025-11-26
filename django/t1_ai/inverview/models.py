@@ -3,18 +3,18 @@ from django.db import models
 # Create your models here.
 class Vacancy(models.Model):
     DIRECTIONS = [
-        ("backend", "Backend"),
-        ("frontend", "Frontend"),
-        ("fullstack", "Full Stack"),
-        ("datascience", "Data Science"),
+        ("Backend", "Backend"),
+        ("Frontend", "Frontend"),
+        ("Full Stack", "Full Stack"),
+        ("Data Science", "Data Science"),
     ]
 
     EXPERIENCE_CHOICES = [
-        ("no_exp", "Новичок (0 лет опыта)"),
-        ("junior", "Junior (1–3 года опыта)"),
-        ("middle", "Middle (3–5 лет опыта)"),
-        ("senior", "Senior (5+ лет опыта)"),
-        ("lead", "Team Lead / Architect (7+ лет опыта)"),
+        ("Новичок (0 лет опыта)", "Новичок (0 лет опыта)"),
+        ("Junior (1–3 года опыта)", "Junior (1–3 года опыта)"),
+        ("Middle (3–5 лет опыта)", "Middle (3–5 лет опыта)"),
+        ("Senior (5+ лет опыта)", "Senior (5+ лет опыта)"),
+        ("Team Lead / Architect (7+ лет опыта)", "Team Lead / Architect (7+ лет опыта)"),
     ]
 
     title = models.CharField(max_length=75, verbose_name="Заголовок")
@@ -26,6 +26,10 @@ class Vacancy(models.Model):
     description = models.CharField(max_length=500, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Вакансия"
+        verbose_name_plural = "Вакансии"
 
 
 

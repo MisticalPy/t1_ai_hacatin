@@ -211,7 +211,7 @@ main {
 .container_general {
     background: white;
     width: 630px;
-    height: 640px;
+    height: 730px;
     border-radius: 24px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
     padding: 50px 44px;
@@ -1013,6 +1013,7 @@ main button:hover {
 
 .resume_main{
     width: 100%;
+    margin-top: 100px;
 }
 .resume_card {
     display: flex;
@@ -1037,11 +1038,10 @@ main button:hover {
     width: 1006px; /* строго по заданию */
     height: 289px; /* строго по заданию */
     border-radius: 16px;
-    border: 4px solid rgba(29, 175, 247, 0.95);
     background: #f7fbfd;
     padding: 18px;
     box-sizing: border-box;
-    box-shadow: 0 18px 40px rgba(26,150,212,0.08);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
     position: relative;
     display: flex;
     flex-direction: column;
@@ -1076,7 +1076,7 @@ main button:hover {
 .resume_submit:hover { transform: translateY(-2px); box-shadow: 0 6px 10px rgba(0, 0, 0, 0.25); }
 
 /* Визуальная тонкая тень/всплытие при фокусе */
-.resume_input_wrap:focus-within { box-shadow: 0 30px 60px rgba(26,150,212,0.12); transform: translateY(-2px); }
+/* .resume_input_wrap:focus-within { box-shadow: 0 30px 60px rgba(26,150,212,0.12); transform: translateY(-2px); } */
 
 /* Адаптив */
 @media (max-width: 1200px) {
@@ -1085,3 +1085,131 @@ main button:hover {
     .resume_actions { align-self: flex-end; margin-bottom: 0; }
 }
 
+
+
+
+
+/* Нейросеть */
+.first_main{
+    display: flex;
+    gap: 25px;
+    flex-direction: column;
+    align-items: center;
+}
+.neiro{
+    border-radius: 9999px;
+    width: 260px;
+    height: 260px;
+    background-color: #1DAFF7;
+    display: flex;
+    justify-content: center;
+    gap: 50px;
+    flex-direction: column;
+}
+.neiro_eyes{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 48px;
+    margin-bottom: 70px; /*Это отступ при ожидании должен убираться*/
+}
+.neiro_eye{
+    border-radius: 50px;
+    width: 37px;
+    height: 58px;
+    background-color: white;
+}
+.neiro_points{
+display: flex;
+flex-direction: row;
+gap: 15px;
+justify-content: center;
+align-items: center;
+}
+.neiro_point{
+width: 35px;
+height: 35px;
+border-radius: 9999px;
+background-color: white;
+}
+/* .neiro_micro{
+    width: 120px;
+    height: 120px;
+    border-radius: 9999px;
+    background-color: #1888ff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+} */
+
+/* Кнопка записи голоса */
+/* Основной стиль кнопки */
+        .neiro_micro {
+            width: 120px;
+            height: 120px;
+            border-radius: 9999px;
+            background-color: #1DAFF7;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+            cursor: pointer;
+            position: relative;
+            /* Плавный переход для фона и размера кнопки */
+            transition: background-color 0.5s ease, transform 0.2s ease;
+        }
+
+        /* Эффект сжатия при клике */
+        .neiro_micro.btn-squeezing-state {
+            transform: scale(0.92);
+        }
+
+        /* Активное состояние - изменённый цвет фона */
+        .neiro_micro.btn-active-state {
+            background-color: #1888ff;
+        }
+
+        /* Контейнер для иконок с абсолютным позиционированием */
+        .neiro-icon-wrapper {
+            position: relative;
+            width: 65px;
+            height: 65px;
+        }
+
+        /* Общие стили для обеих иконок */
+        .neiro-icon-wrapper img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 65px;
+            height: 65px;
+            /* Плавный переход для прозрачности и масштаба */
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        /* Иконка микрофона - видна по умолчанию */
+        .neiro-mic-icon {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* Иконка отправки - скрыта по умолчанию */
+        .neiro-send-icon {
+            margin-left: 3px;
+            opacity: 0;
+            transform: scale(0.5);
+        }
+
+        /* Когда кнопка активна: микрофон исчезает и уменьшается */
+        .neiro_micro.btn-active-state .neiro-mic-icon {
+            opacity: 0;
+            transform: scale(0.5);
+        }
+
+        /* Когда кнопка активна: стрелка появляется и увеличивается */
+        .neiro_micro.btn-active-state .neiro-send-icon {
+            opacity: 1;
+            transform: scale(1);
+        }

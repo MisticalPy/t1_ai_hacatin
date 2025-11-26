@@ -1,5 +1,7 @@
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, ListView, DetailView
 from django.shortcuts import render
+
+from inverview.models import Vacancy
 
 
 # Create your views here.
@@ -12,6 +14,8 @@ class AboutPageView(TemplateView):
     template_name = "pages/about.html"
 
 
-class VacanciesShowPageView(TemplateView):
+class VacanciesShowPageView(ListView):
+    model = Vacancy
     template_name = "pages/vacancies.html"
+    context_object_name = "vacancies"
 
