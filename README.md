@@ -18,7 +18,6 @@ VibeCode Jam - это облачная ИИ-платформа для прове
 
 - **Backend**: Django, Python
 - **Frontend**: JavaScript, HTML, CSS  
-- **Telegram Bot**: iogram
 - **База данных**: SQLite
 - **Дополнительно**: Docker, JSON
 
