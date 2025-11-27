@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<main class="vacanies_main">
+    <!-- Блок фильтров вакансий: слева отображается список фильтров (аккордеон/выпадающие меню).
+         Каждый фильтр — это элемент с кнопкой и первым уровнем подменю (ul > li).
+         JS управляет aria-expanded и атрибутом hidden на подменю для доступности. -->
+    <div class="vacanies_filters">
+        <div class="filters-header">
+            <span class="filters-header__pill">Фильтры</span>
+        </div>
+        <!-- Панель фильтров с фиксированными размерами (см. макет) -->
+        <div class="filters-panel">
+
+            <ul class="filters-menu">
+            <!-- Фильтр 1: Отдел -->
+            <li class="filter" data-has-children>
+                <button class="filter__btn" aria-expanded="false" aria-controls="filter-department">
+                    <span class="filter__text">Формат работы</span>
+                    <!-- Иконка-стрелка (вращается при открытии) -->
+                    <svg class="filter__chev" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="#9AA0A6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
+                </button>
+                <ul class="filter__submenu" id="filter-department" hidden>
+                    <li class="filter__item"><a href="#">Разработка (Engineering)</a></li>
+                    <li class="filter__item"><a href="#">Дизайн (Design)</a></li>
+                    <li class="filter__item"><a href="#">Маркетинг (Marketing)</a></li>
+                    <li class="filter__item"><a href="#">HR / People</a></li>
+                </ul>
+            </li>
+
+            <!-- Фильтр 2: Тип занятости -->
+            <li class="filter" data-has-children>
+                <button class="filter__btn" aria-expanded="false" aria-controls="filter-employment">
+                    <span class="filter__text">Зарплата</span>
+                    <svg class="filter__chev" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="#9AA0A6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
+                </button>
+                <ul class="filter__submenu" id="filter-employment" hidden>
+                    <li class="filter__item"><a href="#">Полная занятость</a></li>
+                    <li class="filter__item"><a href="#">Частичная занятость</a></li>
+                    <li class="filter__item"><a href="#">Удалённо</a></li>
+                    <li class="filter__item"><a href="#">Стажировка</a></li>
+                </ul>
+            </li>
+
+            <!-- Фильтр 3: Уровень -->
+            <li class="filter" data-has-children>
+                <button class="filter__btn" aria-expanded="false" aria-controls="filter-level">
+                    <span class="filter__text">Образование</span>
+                    <svg class="filter__chev" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="#9AA0A6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
+                </button>
+                <ul class="filter__submenu" id="filter-level" hidden>
+                    <li class="filter__item"><a href="#">Junior</a></li>
+                    <li class="filter__item"><a href="#">Middle</a></li>
+                    <li class="filter__item"><a href="#">Senior</a></li>
+                    <li class="filter__item"><a href="#">Lead</a></li>
+                </ul>
+            </li>
+
+            <!-- Фильтр 4: Город / Регион -->
+            <li class="filter" data-has-children>
+                <button class="filter__btn" aria-expanded="false" aria-controls="filter-location">
+                    <span class="filter__text">Опыт работы</span>
+                    <svg class="filter__chev" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="#9AA0A6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
+                </button>
+                <ul class="filter__submenu" id="filter-location" hidden>
+                    <li class="filter__item"><a href="#">Москва</a></li>
+                    <li class="filter__item"><a href="#">Санкт‑Петербург</a></li>
+                    <li class="filter__item"><a href="#">Новосибирск</a></li>
+                    <li class="filter__item"><a href="#">Удалённо</a></li>
+                </ul>
+            </li>
+        </ul>
+        </div> <!-- /.filters-panel -->
+    </div>
+
+    <!-- Здесь будет контейнер для списка вакансий; пока оставлен пустым — можно заполнить карточками как в старой версии -->
+    <div class="vacanies_list" aria-live="polite">
+        <!--
+            Пример карточек вакансий — два варианта, сверстанные под макет.
+            Размеры карточек по макету: 728×221 (ширина — приближённая, т.к. layout адаптивный).
+            Псевдо-структура:
+            .vacancy-card
+              .vacancy-card__side  — вертикальная голубая полоска
+              .vacancy-card__content
+                .vacancy-card__title (30px)
+                .vacancy-card__meta (20px)
+                .vacancy-card__tags (pills 10px)
+                .vacancy-card__actions (button 251×43)
+        -->
+        <p class="vacancy_list_p">Найдено: {{vacancies|length}} вакансий</p>
+        {% for vacancy in vacancies %}
+        <div class="vacancy-card" tabindex="0">
+            <div class="vacancy-card__side" aria-hidden="true"></div>
+            <div class="vacancy-card__content">
+                <div class="vacancy-card__content_base">
+                    <div class="vacancy-card__content_text">
+                        <h3 class="vacancy-card__title">{{vacancy.title}}</h3>
+                        <p class="vacancy-card__meta">от {{vacancy.salary_from}} ₽ за месяц, на руки</p>
+                    </div>
+
+                    <div class="vacancy-card__tags">
+                        <span class="tag">{{vacancy.experience}}</span>
+
+                        {% if vacancy.is_remote %}
+                        <span class="tag">Можно удаленно</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="vacancy-card__actions">
+                    <a href="{% url 'interview:start' vacancy.id %}" class="btn btn--primary vacancy-card__btn">Пройти ИИ-собеседование</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</main>
+
+{% endblock %}

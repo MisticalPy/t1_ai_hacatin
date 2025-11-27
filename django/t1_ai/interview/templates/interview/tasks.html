@@ -1,0 +1,194 @@
+{% extends 'base.html' %}
+
+{% block optional_head %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.14/codemirror.min.css" />
+    <!-- (опциональная тема) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.14/theme/dracula.min.css" />
+    <style>
+        /* Контейнер по центру (можешь убрать/изменить) */
+        .editor-wrapper {
+            width: 1006px;
+            height: 289px;
+            margin: 12px auto;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+            border-radius: 4px;
+            overflow: hidden;
+            background: white;
+            cursor: text;
+        }
+        /* CodeMirror сам занимает размер, но зададим контейнеру */
+        .CodeMirror { height: 100% !important; }
+
+        /* Рамка вокруг всего редактора */
+    .CodeMirror {
+        background-color: #F7FAFC !important; /* основной блок */
+        border: 1px solid #DFE7F0 !important; /* рамка */
+        height: 100% !important;
+    }
+
+    /* Боковая панель с номерами строк */
+    .CodeMirror-gutters {
+        background-color: #4ec4ff !important; /* цвет боковины */
+        border-right: 1px solid #DFE7F0 !important; /* граница справа */
+    }
+
+    /* Цвет текста номеров строк */
+    .CodeMirror-linenumber {
+        color: #ffffff !important; /* если хочешь другой — поменяй */
+    }
+    </style>
+{% endblock %}
+
+{% block content %}
+
+<main class="second_main">
+<div class="second_base">
+    <div class="filters-header">
+            <span class="filters-header__pill">{{task.difficulty}}</span>
+    </div>
+    <div class="second_textarea">
+        <p>
+            <span>{{task.title}}</span><br>{{task.description}}
+        </p>
+        <p>
+            <span>Входные и выходные данные</span>
+            {% for tc in testcases %}
+            <br>Входные данные: {{ tc.input_data }} -> Выходные данные: {{ tc.output_data }}
+            {% endfor %}
+        </p>
+    </div>
+            <div class="ide_sec">
+            <div class="editor-wrapper" id="editorWrapper">
+        <textarea id="editorTextarea" placeholder="# Напиши Python код здесь"></textarea>
+      </div>
+
+      <!-- CodeMirror core -->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.14/codemirror.min.js"></script>
+
+      <!-- Python mode + useful addons -->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.14/mode/python/python.min.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.14/addon/edit/matchbrackets.min.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.14/addon/edit/closebrackets.min.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.14/addon/display/placeholder.min.js"></script>
+
+      <script>
+        // --- Настройки ---
+        const STORAGE_KEY = 'python_editor_autosave_v1'; // ключ для localStorage (можно поменять)
+        const DEFAULT_CODE = "# Пример Python\nprint('Hello, world!')\n";
+
+        // Инициализация редактора
+        const textarea = document.getElementById('editorTextarea');
+        const editor = CodeMirror.fromTextArea(textarea, {
+          mode: 'python',
+          lineNumbers: true,
+          indentUnit: 4,
+          tabSize: 4,
+          indentWithTabs: false,
+          matchBrackets: true,
+          autoCloseBrackets: true,
+          theme: 'default', // можно поменять на 'dracula' или другой, если хочешь
+          lineWrapping: true,
+          viewportMargin: Infinity, // рендерит весь документ (удобно для фикс. размеров)
+          placeholder: "# Ваш Python код..."
+        });
+
+        // Устанавливаем размер контейнера (точно 1006x289)
+        const wrapper = document.getElementById('editorWrapper');
+        wrapper.style.width = '1006px';
+        wrapper.style.height = '289px';
+        // CodeMirror сам подхватит высоту благодаря .CodeMirror { height: 100% }
+
+        // Поведение клавиши Tab: вставлять 4 пробела
+        editor.setOption("extraKeys", {
+          "Tab": function(cm) {
+            if (cm.somethingSelected()) cm.indentSelection("add");
+            else cm.replaceSelection(" ".repeat(4), "end");
+          }
+        });
+
+        // Загрузка сохранённого состояния (если есть)
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved !== null) {
+          editor.setValue(saved);
+        } else {
+          editor.setValue(DEFAULT_CODE);
+        }
+
+        // Автосохранение: при изменении сохраняем в localStorage
+        let saveTimeout = null;
+        editor.on('change', () => {
+          // дебаунс, чтобы не писать на каждое нажатие
+          if (saveTimeout) clearTimeout(saveTimeout);
+          saveTimeout = setTimeout(() => {
+            try {
+              localStorage.setItem(STORAGE_KEY, editor.getValue());
+              // console.log('Autosaved');
+            } catch (e) {
+              console.warn('Autosave failed', e);
+            }
+          }, 500); // сохраняем через 500ms после последнего изменения
+        });
+
+        // Экспорт функций для внешнего кода, если нужно
+        window.PythonEditor = {
+          getValue: () => editor.getValue(),
+          setValue: (v) => editor.setValue(v),
+          clear: () => {
+            editor.setValue('');
+            localStorage.removeItem(STORAGE_KEY);
+          },
+          setThemeDark: (on) => editor.setOption('theme', on ? 'dracula' : 'default')
+        };
+      </script>
+      </div>
+    <div class="ide_buttons">
+        <div style="width: 230px; height: 100%;"></div>
+        <div style="height: 62px; width: 230px;">
+        <button class="button_enter_ide" id="button_enter_ide">Продолжить</button>
+        </div>
+    </div>
+</div>
+</main>
+
+{# === ДОБАВИЛ ТОЛЬКО ЭТОТ СКРИПТ НИЖЕ === #}
+<script>
+    // берём csrf из куки
+    const getCookie = (name) =>
+        document.cookie
+            .split('; ')
+            .find(row => row.startsWith(name + '='))
+            ?.split('=')[1] || null;
+
+    const runBtn = document.getElementById('button_enter_ide');
+
+    if (runBtn) {
+        runBtn.addEventListener('click', async () => {
+            const code = window.PythonEditor?.getValue
+                ? window.PythonEditor.getValue()
+                : '';
+
+            console.clear();
+            console.log('=== Код из редактора ===');
+            console.log(code);
+
+            try {
+                const response = await fetch(window.location.href, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken'),
+                    },
+                    body: JSON.stringify({ code: code })
+                });
+
+                const data = await response.json().catch(() => null);
+                console.log('=== Ответ от Django ===');
+                console.log(data ?? response.status);
+            } catch (err) {
+                console.error('Ошибка при отправке кода:', err);
+            }
+        });
+    }
+</script>
+
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<main class="resume_main container">
+    <section class="resume_card">
+        <div class="filters-header">
+            <span class="filters-header__pill">Резюме</span>
+        </div>
+
+        <div class="resume_row">
+            <form method="POST" class="resume_input_wrap" role="group">
+                {% csrf_token %}
+                {{ form.about }}
+
+                <div class="resume_actions">
+                    <input type="submit" class="resume_submit">
+                </div>
+            </form>
+        </div>
+
+    </section>
+</main>
+
+{% endblock %}

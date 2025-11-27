@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% with current_type=type|default:'login' %}
+<div class="container_reg">
+    <div class="container_general">
+        <div class="tabs">
+            <button class="tab {% if current_type == 'login' %}active{% endif %}" data-tab="login">
+                Вход
+                <div class="tab-underline"></div>
+            </button>
+            <button class="tab {% if current_type == 'register' %}active{% endif %}" data-tab="register">
+                Регистрация
+                <div class="tab-underline"></div>
+            </button>
+        </div>
+
+        <div class="form-container">
+            {# -------- ФОРМА ЛОГИНА -------- #}
+            <form id="loginForm"
+                  method="POST"
+                  action="{% url 'users:login' %}"
+                  class="{% if current_type == 'login' %}active{% endif %}">
+                {% csrf_token %}
+
+                <div class="form-fields">
+                    <div class="input-wrapper">
+                        <label for="{{ login_form.username.id_for_label }}">{{ login_form.username.label }}</label>
+                        {{ login_form.username }}
+                        <div class="form-error">{{ login_form.username.errors }}</div>
+                    </div>
+
+                    <div class="input-wrapper">
+                        <label for="{{ login_form.password.id_for_label }}">{{ login_form.password.label }}</label>
+                        {{ login_form.password }}
+                        <div class="form-error">{{ login_form.password.errors }}</div>
+                    </div>
+                </div>
+
+                {{ login_form.non_field_errors }}
+
+                <div class="button-wrapper">
+                    <button type="submit" class="submit-btn">Вход</button>
+                </div>
+            </form>
+
+            <form id="registerForm"
+                  method="POST"
+                  action="{% url 'users:register' %}"
+                  class="{% if current_type == 'register' %}active{% endif %}">
+                {% csrf_token %}
+
+                <div class="form-fields">
+                    <!-- PHONE -->
+                    <div class="input-wrapper">
+                        <label for="{{ register_form.phone.id_for_label }}">{{ register_form.phone.label }}</label>
+                        {{ register_form.phone }}
+                        <div class="form-error">{{ register_form.phone.errors }}</div>
+                    </div>
+
+                    <!-- EMAIL -->
+                    <div class="input-wrapper">
+                        <label for="{{ register_form.email.id_for_label }}">{{ register_form.email.label }}</label>
+                        {{ register_form.email }}
+                        <div class="form-error">{{ register_form.email.errors }}</div>
+                    </div>
+
+                    <!-- PASSWORD1 -->
+                    <div class="input-wrapper">
+                        <label for="{{ register_form.password1.id_for_label }}">{{ register_form.password1.label }}</label>
+                        {{ register_form.password1 }}
+                        <div class="form-error">{{ register_form.password1.errors }}</div>
+                    </div>
+
+                    <!-- PASSWORD2 -->
+                    <div class="input-wrapper">
+                        <label for="{{ register_form.password2.id_for_label }}">{{ register_form.password2.label }}</label>
+                        {{ register_form.password2 }}
+                        <div class="form-error">{{ register_form.password2.errors }}</div>
+                    </div>
+
+                    <!-- AGREE -->
+                    <div class="checkbox-wrapper">
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="registerAgreed" name="register-agreed" checked>
+                            <div class="checkbox-custom">
+                                <svg width="14" height="11" viewBox="0 0 14 11" fill="none">
+                                    <path d="M1 5.5L5 9.5L13 1.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                            </div>
+                            <span class="checkbox-label">Я согласен на обработку персональных данных</span>
+                        </label>
+                    </div>
+
+                    {{ register_form.non_field_errors }}
+                </div>
+
+                <div class="button-wrapper">
+                    <button type="submit" class="submit-btn" id="registerBtn">Регистрация</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endwith %}
+{% endblock %}
