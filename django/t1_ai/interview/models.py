@@ -89,6 +89,11 @@ class Vacancy(models.Model):
         help_text="Список навыков, напримео ['Python, 'Django', 'PostreSQL']"
     )
 
+    total_questions = models.IntegerField(
+        default=5,
+        verbose_name="Количество вопросов"
+    )
+
     tasks = models.ManyToManyField(
         "Task",
         blank=True,
@@ -151,6 +156,11 @@ class Interview(models.Model):
         verbose_name="Статус"
     )
 
+    answered_questions_count = models.IntegerField(
+        default=0,
+        verbose_name="Количество отвеченных вопросов"
+    )
+
     score = models.FloatField(
         null=True,
         blank=True,
@@ -209,11 +219,6 @@ class InterviewQA(models.Model):
         verbose_name="Ответ пользователя"
     )
 
-    ai_reply = models.TextField(
-        blank=True,
-        verbose_name="Ответ ИИ / фидбек"
-    )
-
     created_at = models.DateTimeField(
         auto_now_add=True,
         verbose_name="Время вопроса"
@@ -222,7 +227,7 @@ class InterviewQA(models.Model):
     class Meta:
         verbose_name = "Вопрос-ответ собеседования"
         verbose_name_plural = "Вопросы-ответы собеседований"
-        ordering = ["-created_at"]
+        ordering = ["created_at"]
 
 
 class UserResume(models.Model):

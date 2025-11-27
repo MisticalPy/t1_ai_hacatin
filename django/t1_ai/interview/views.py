@@ -5,6 +5,10 @@ from django.http import HttpResponseForbidden, JsonResponse
 from .models import Vacancy, Interview, UserResume
 from .forms import ResumePostForm
 
+# БИЗНЕС-ЛОГИКА
+from services.prompt_generator import PromptGenerator
+from services.speech import SpeechRecognizer
+
 # Create your views here.
 @login_required
 def start_interview(request, vacancy_id):
@@ -78,5 +82,31 @@ def interview_questions(request, interview_id):
 
     if interview.status != interview.Status.ACTIVE_QUESTION:
         return redirect("interview:router", interview_id=interview.id)
+
+    if request.method == "POST":
+        file_obj = request.FILES.get("file")
+        user_answer = SpeechRecognizer.recognize(file_obj.read())
+        print(user_answer)
+
+        json_object = {
+            "status": "ok",
+            "data": {
+                "message": "",
+                "is_stop": False,
+            }
+        }
+        # Кол-во вопросов всего
+        total_count_questions = interview.vacancy.total_questions
+        cur_question = interview.answered_questions_count
+
+        if cur_question >= total_count_questions:
+            interview.status = Interview.Status.ACTIVE_QUESTION
+            interview.save()
+
+            return JsonResponse(json_object)
+
+        if cur_question == 0:
+            json_object["data"]["message"] = "Добрый день, вы проходите онлайн собеседование будьте предельно честны."
+            return JsonResponse(json_object)
 
     return render(request, "interview/question.html")
