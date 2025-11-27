@@ -1,3 +1,8 @@
+import json
+import uuid
+
+from django.core.files.base import ContentFile
+from django.core.files.storage import FileSystemStorage
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden, JsonResponse
@@ -10,6 +15,7 @@ from .forms import ResumePostForm
 from services.prompt_generator import PromptGenerator
 from services.speech import SpeechRecognizer
 from services.ai_client import AIClient
+from services.code_container import DockerContainer
 
 # Create your views here.
 @login_required
@@ -177,6 +183,12 @@ def interview_tasks(request, interview_id):
 
     active_tasks = Task.objects.exclude(id__in=used_tasks)
 
+    if not active_tasks:
+        interview.status = Interview.Status.FINISHED
+        interview.save()
+
+        return redirect("interview:router", interview_id=interview.id)
+
     sorted_tasks = active_tasks.annotate(
         sort_order=Case(
             When(difficulty="1-ый уровень", then=Value(0)),
@@ -189,16 +201,35 @@ def interview_tasks(request, interview_id):
     # Выбираем теущую задачу
     cur_task = sorted_tasks[0]
 
-    print(cur_task.difficulty)
+    if request.method != "POST":
 
-    context = {
-        "task": cur_task,
-        "testcases": cur_task.test_cases.all()
-    }
+        context = {
+            "task": cur_task,
+            "testcases": cur_task.test_cases.all()
+        }
+
+        return render(request, "interview/tasks.html", context=context)
+
+    try:
+        code = json.loads(request.body.decode("utf-8"))["code"]
+    except json.JSONDecodeError:
+        return JsonResponse({"status": "error", "message": "invalid json"}, status=400)
+
+    file_id = str(uuid.uuid4())[:8]
+    filename = f"{file_id}.py"
+
+    fs = FileSystemStorage(location="media/code_submits")
+    saved_path = fs.save(filename, ContentFile(code))
+
+    runner = DockerContainer(code_path=fs.path(saved_path), timeout=1)
+    ok, status_code, logs = runner.run()
+    print(logs)
+
+    return JsonResponse({"status": "ok"})
 
 
 
-    return render(request, "interview/tasks.html", context=context)
+    print("POST")
 
 
 

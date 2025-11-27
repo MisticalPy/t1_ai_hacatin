@@ -150,9 +150,45 @@
 </div>
 </main>
 
+{# === ДОБАВИЛ ТОЛЬКО ЭТОТ СКРИПТ НИЖЕ === #}
+<script>
+    // берём csrf из куки
+    const getCookie = (name) =>
+        document.cookie
+            .split('; ')
+            .find(row => row.startsWith(name + '='))
+            ?.split('=')[1] || null;
+
+    const runBtn = document.getElementById('button_enter_ide');
+
+    if (runBtn) {
+        runBtn.addEventListener('click', async () => {
+            const code = window.PythonEditor?.getValue
+                ? window.PythonEditor.getValue()
+                : '';
+
+            console.clear();
+            console.log('=== Код из редактора ===');
+            console.log(code);
+
+            try {
+                const response = await fetch(window.location.href, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken'),
+                    },
+                    body: JSON.stringify({ code: code })
+                });
+
+                const data = await response.json().catch(() => null);
+                console.log('=== Ответ от Django ===');
+                console.log(data ?? response.status);
+            } catch (err) {
+                console.error('Ошибка при отправке кода:', err);
+            }
+        });
+    }
+</script>
+
 {% endblock %}
-
-
-
-
-
