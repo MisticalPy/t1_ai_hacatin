@@ -175,20 +175,17 @@ def interview_tasks(request, interview_id):
     if not interview.is_owner(request.user):
         return HttpResponseForbidden()
 
-    if interview.status != interview.Status.ACTIVE_TASKS:
+    if interview.status != Interview.Status.ACTIVE_TASKS:
         return redirect("interview:router", interview_id=interview.id)
 
-    # Супер сложная логика обращения к базе данных
     used_tasks = TaskSolution.objects.filter(interview=interview).values_list("task_id", flat=True)
-
     active_tasks = Task.objects.exclude(id__in=used_tasks)
 
     if not active_tasks:
-        interview.status = Interview.Status.FINISHED
-        interview.save()
-
+        interview.finish(reason="Все задачи решены")
         return redirect("interview:router", interview_id=interview.id)
 
+    # сортировка
     sorted_tasks = active_tasks.annotate(
         sort_order=Case(
             When(difficulty="1-ый уровень", then=Value(0)),
@@ -198,40 +195,90 @@ def interview_tasks(request, interview_id):
         )
     ).order_by("sort_order")
 
-    # Выбираем теущую задачу
     cur_task = sorted_tasks[0]
 
+    # -------------------- GET --------------------
     if request.method != "POST":
-
-        context = {
+        return render(request, "interview/tasks.html", {
             "task": cur_task,
             "testcases": cur_task.test_cases.all()
-        }
+        })
 
-        return render(request, "interview/tasks.html", context=context)
-
+    # -------------------- POST: RUN TASK --------------------
     try:
         code = json.loads(request.body.decode("utf-8"))["code"]
     except json.JSONDecodeError:
         return JsonResponse({"status": "error", "message": "invalid json"}, status=400)
 
+    # сохраняем код
     file_id = str(uuid.uuid4())[:8]
-    filename = f"{file_id}.py"
-
     fs = FileSystemStorage(location="media/code_submits")
-    saved_path = fs.save(filename, ContentFile(code))
+    saved_path = fs.save(f"{file_id}.py", ContentFile(code))
 
-    runner = DockerContainer(code_path=fs.path(saved_path), timeout=1)
-    ok, status_code, logs = runner.run()
-    print(logs)
+    # СОЗДАЁМ TaskSolution
+    solution = TaskSolution.objects.create(
+        interview=interview,
+        task=cur_task,
+        answer=code,
+        status=TaskSolution.Status.RUNNING,
+    )
 
-    return JsonResponse({"status": "ok"})
+    passed = 0
+    failed = 0
+
+    # ------------------ ГОНЯЕМ ВСЕ TEST CASES ------------------
+    for test in cur_task.test_cases.all():
+
+        runner = DockerContainer(
+            code_path=fs.path(saved_path),
+            timeout=cur_task.time_limit,
+            input_data=test.input_data
+        )
+        ok, status_code, logs = runner.run()
+        print(ok, status_code, logs)
+
+        # Результат ДАЛ ОТВЕТ
+        if ok:
+            # Убираем \n и пробелы
+            expected = test.output_data.strip()
+            got = logs.strip()
+
+            if expected == got:
+                passed += 1
+            else:
+                failed += 1
+        else:
+            failed += 1
+
+    # ---- ОБНОВЛЯЕМ SOLUTION ----
+    solution.passed_tests = passed
+    solution.failed_tests = failed
+    solution.status = (
+        TaskSolution.Status.DONE if failed == 0 else TaskSolution.Status.ERROR
+    )
+
+    # начисляем баллы (можешь формулу любую вставить)
+    solution.score = passed / (passed + failed) * cur_task.max_balls
+    solution.save()
+
+    # ---- ОТДАДИМ JSON ----
+    return JsonResponse({
+        "status": "ok",
+        "passed": passed,
+        "failed": failed,
+        "score": solution.score,
+    })
 
 
+@login_required
+def interview_summary(request, interview_id):
+    interview = get_object_or_404(Interview, id=interview_id)
 
-    print("POST")
+    if not interview.is_owner(request.user):
+        return HttpResponseForbidden()
 
-
+    if interview.status != Interview.Status.FINISHED:
+        return redirect("interview:router", interview_id=interview.id)
 
 
 

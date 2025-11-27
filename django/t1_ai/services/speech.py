@@ -13,7 +13,7 @@ class SpeechRecognizer:
 
     # Инициализируешь клиента один раз (лучше вынести API_KEY в env)
     client = OpenAI(
-        api_key="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",
+        api_key="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",
     )
 
     MODEL_NAME = "whisper-1"

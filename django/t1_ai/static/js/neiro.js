@@ -225,3 +225,15 @@ document.getElementById('button_enter_n').addEventListener('click', function () 
     let newUrl = url.replace(/questions\/?$/, "");
     window.location.href = newUrl;  // редирект
 });
+const neiro_eyes = document.getElementById("neiro_eyes")
+const eyelid = document.getElementById("eyelid")
+// Это засунуть в функцию которая озвучивает текст в начало
+neiro_eyes.classList.add("neiro_eyes_movement");
+eyelid.classList.add("eyelid_blink");
+
+
+
+
+// Это засунуть в первое нажатие кнопки записи когда запись начинается
+neiro_eyes.classList.remove("neiro_eyes_movement");
+eyelid.classList.remove("eyelid_blink");
