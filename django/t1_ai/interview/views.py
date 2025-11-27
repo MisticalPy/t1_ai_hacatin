@@ -2,12 +2,14 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden, JsonResponse
 
-from .models import Vacancy, Interview, UserResume
+from django.db.models import Case, When, Value, IntegerField
+from .models import Vacancy, Interview, UserResume, InterviewQA, TaskSolution, Task
 from .forms import ResumePostForm
 
 # БИЗНЕС-ЛОГИКА
 from services.prompt_generator import PromptGenerator
 from services.speech import SpeechRecognizer
+from services.ai_client import AIClient
 
 # Create your views here.
 @login_required
@@ -75,6 +77,11 @@ def interview_resume(request, interview_id):
 
 @login_required
 def interview_questions(request, interview_id):
+    """Начинается самая душная часть всего проекта,
+    логика ответов...
+    но так как я круто расписал модели логику написать
+    не составит большого труда...
+    """
     interview = get_object_or_404(Interview, id=interview_id)
 
     if not interview.is_owner(request.user):
@@ -83,30 +90,124 @@ def interview_questions(request, interview_id):
     if interview.status != interview.Status.ACTIVE_QUESTION:
         return redirect("interview:router", interview_id=interview.id)
 
-    if request.method == "POST":
-        file_obj = request.FILES.get("file")
-        user_answer = SpeechRecognizer.recognize(file_obj.read())
-        print(user_answer)
+    if request.method == "GET":
+        return render(request, "interview/question.html")
 
-        json_object = {
+    # Сборщик JSON ответа
+    def make_response(message: str, is_stop: bool = False):
+        return JsonResponse({
             "status": "ok",
             "data": {
-                "message": "",
-                "is_stop": False,
+                "message": message,
+                "is_stop": is_stop,
             }
-        }
-        # Кол-во вопросов всего
-        total_count_questions = interview.vacancy.total_questions
-        cur_question = interview.answered_questions_count
+        })
 
-        if cur_question >= total_count_questions:
-            interview.status = Interview.Status.ACTIVE_QUESTION
-            interview.save()
+    total_questions = interview.vacancy.total_questions
 
-            return JsonResponse(json_object)
+    # 1. Текущий открытый вопрос без ответа пользователя
+    active_qa = interview.qas.filter(user_answer__isnull=True).last()
+    asked_count = interview.qas.count()
 
-        if cur_question == 0:
-            json_object["data"]["message"] = "Добрый день, вы проходите онлайн собеседование будьте предельно честны."
-            return JsonResponse(json_object)
+    if asked_count == 0 and not active_qa:
+        first_question = "Добрый день, я ваш ИИ-HR, расскажите о своём последнем проекте."
 
-    return render(request, "interview/question.html")
+        active_qa = InterviewQA.objects.create(
+            session=interview,
+            question=first_question
+        )
+
+        return make_response(active_qa.question)
+
+    # 2. Если пользователь не прислал голосовое сообщение
+    file_obj = request.FILES["file"]
+    if not file_obj:
+        if active_qa:
+            return make_response(active_qa.question)
+
+
+    # 3. Распознавание ответа пользователя
+    user_answer = SpeechRecognizer.recognize(file_obj.read())
+
+    if not user_answer:
+        return make_response("Извините, я не понял, что вы говорите. Попробуйте еще раз.")
+
+    # 4. Запись ответа в активный вопрос
+    if active_qa:
+        active_qa.user_answer = user_answer
+        active_qa.save()
+
+    answered_count = interview.qas.filter(user_answer__isnull=False).count()
+
+    # 5. Проверяем, не закончились ли вопросы
+    if answered_count >= total_questions:
+        interview.status = Interview.Status.ACTIVE_TASKS
+        interview.save()
+
+        return make_response(
+            "Спасибо, вы закончили текущий этап собеседования, Переходим к следующему.",
+            is_stop=True
+        )
+
+    # 6. Генерируем следующий вопрос от ИИ
+    ai_question = AIClient.generate_question(
+        PromptGenerator.generate_question(interview=interview),
+    )
+
+    InterviewQA.objects.create(
+        session=interview,
+        question=ai_question,
+    )
+
+    return make_response(ai_question)
+
+
+@login_required
+def interview_tasks(request, interview_id):
+    interview = get_object_or_404(Interview, id=interview_id)
+
+    if not interview.is_owner(request.user):
+        return HttpResponseForbidden()
+
+    if interview.status != interview.Status.ACTIVE_TASKS:
+        return redirect("interview:router", interview_id=interview.id)
+
+    # Супер сложная логика обращения к базе данных
+    used_tasks = TaskSolution.objects.filter(interview=interview).values_list("task_id", flat=True)
+
+    active_tasks = Task.objects.exclude(id__in=used_tasks)
+
+    sorted_tasks = active_tasks.annotate(
+        sort_order=Case(
+            When(difficulty="1-ый уровень", then=Value(0)),
+            When(difficulty="2-ой уровень", then=Value(1)),
+            When(difficulty="3-ий уровень", then=Value(2)),
+            output_field=IntegerField()
+        )
+    ).order_by("sort_order")
+
+    # Выбираем теущую задачу
+    cur_task = sorted_tasks[0]
+
+    print(cur_task.difficulty)
+
+    context = {
+        "task": cur_task,
+        "testcases": cur_task.test_cases.all()
+    }
+
+
+
+    return render(request, "interview/tasks.html", context=context)
+
+
+
+
+
+
+
+
+
+
+
+

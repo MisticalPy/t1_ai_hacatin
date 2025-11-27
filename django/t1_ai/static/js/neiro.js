@@ -220,4 +220,8 @@ buttonMic.addEventListener('click', () => {
     toggleButtonMic();
 });
 
-
+document.getElementById('button_enter_n').addEventListener('click', function () {
+    let url = window.location.href;
+    let newUrl = url.replace(/questions\/?$/, "");
+    window.location.href = newUrl;  // редирект
+});

@@ -64,7 +64,7 @@ class PromptGenerator:
         """
 
     @classmethod
-    def generate_question(cls, interview) -> dict:
+    def generate_question(cls, interview) -> list:
         cur_vacancy = interview.vacancy
 
         # Составляем системный промпт
@@ -90,15 +90,16 @@ class PromptGenerator:
         qa_list: QuerySet = interview.qas.all()
 
         for qa in qa_list:
-            messages.append(
-                {"role": "assistant",
-                 "content": qa.question,}
-            )
+            if qa.question:
+                messages.append(
+                    {"role": "assistant",
+                     "content": qa.question,}
+                )
+            if qa.user_answer:
+                messages.append(
+                    {"role": "user",
+                     "content": qa.user_answer}
+                )
 
-            messages.append(
-                {"role": "user",
-                 "content": qa.user_answer}
-            )
-
-        return {"messages": messages}
+        return messages
 

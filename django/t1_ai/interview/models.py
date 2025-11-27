@@ -21,17 +21,24 @@ class ExperienceLevels(models.TextChoices):
 
 class Task(models.Model):
     """Модель для представления задачей который будут на ИИ-собесе"""
-    DIFFICULTY_CHOICES = ["1-й уровень", "2-уровень", "3-уровень"]
-    DIFFICULTY_CHOICES = [(i, i) for i in DIFFICULTY_CHOICES]
+    class DifficultChoices(models.TextChoices):
+        BASE = "1-ый уровень", "1-ый уровень"
+        MEDIUM = "2-ой уровень", "2-ой уровень"
+        HARD = "3-ий уровень", "3-ий уровень"
 
     title = models.CharField(max_length=100, verbose_name="Название задачи")
     description = models.TextField(verbose_name="Описание / Условие")
 
     difficulty = models.CharField(
         max_length=25,
-        choices=DIFFICULTY_CHOICES,
-        default=DIFFICULTY_CHOICES[0][0],
+        choices=DifficultChoices,
+        default=DifficultChoices.BASE,
         verbose_name="Сложность"
+    )
+
+    time_limit = models.IntegerField(
+        default=1,
+        verbose_name="Ограничение по времени"
     )
 
     max_balls = models.IntegerField(
@@ -39,14 +46,35 @@ class Task(models.Model):
         verbose_name="Максимальное количество баллов"
     )
 
-    # Пример эталлоного решения (для проверки ИИ)
-    correct_answer = models.TextField(
-        blank=True,
-        verbose_name="Эталонное решение"
-    )
+    class Meta:
+        verbose_name = "Задача"
+        verbose_name_plural = "Задачи"
 
     def __str__(self):
         return self.title
+
+
+class TestCase(models.Model):
+    task = models.ForeignKey(
+        Task,
+        on_delete=models.CASCADE,
+        related_name="test_cases",
+        verbose_name="Задача"
+    )
+
+    input_data = models.TextField(
+        verbose_name="Входные данные",
+        help_text="Что поступает на вход программе"
+    )
+
+    output_data = models.TextField(
+        verbose_name="Ожидаемый вывод",
+        help_text="Что программа ДОЛЖНА вывести"
+    )
+
+    def __str__(self):
+        return f"Тест {self.id} для {self.task.title}"
+
 
 class Vacancy(models.Model):
     """Модель для представления вакансий"""
@@ -156,11 +184,6 @@ class Interview(models.Model):
         verbose_name="Статус"
     )
 
-    answered_questions_count = models.IntegerField(
-        default=0,
-        verbose_name="Количество отвеченных вопросов"
-    )
-
     score = models.FloatField(
         null=True,
         blank=True,
@@ -186,7 +209,7 @@ class Interview(models.Model):
 
     class Meta:
         verbose_name = "Сессия собеседования"
-        verbose_name_plural = "Сессии собеседвоаний"
+        verbose_name_plural = "Сессии собеседований"
         ordering = ["-started_at"]
 
     def is_owner(self, user):
@@ -216,6 +239,8 @@ class InterviewQA(models.Model):
     )
 
     user_answer = models.TextField(
+        blank=True,
+        null=True,
         verbose_name="Ответ пользователя"
     )
 
@@ -246,3 +271,89 @@ class UserResume(models.Model):
     created_at = models.DateTimeField(
         auto_now_add=True,
     )
+
+
+class TaskSolution(models.Model):
+    """Решение одной задачи в рамках конкретного собеседования."""
+
+    class Status(models.TextChoices):
+        PENDING = "pending", "Ожидает проверки"
+        RUNNING = "running", "Выполняется"
+        DONE = "done", "Проверено"
+        ERROR = "error", "Ошибка запуска / проверки"
+
+    interview = models.ForeignKey(
+        Interview,
+        on_delete=models.CASCADE,
+        related_name="task_solutions",
+        verbose_name="Сессия собеседования",
+    )
+
+    task = models.ForeignKey(
+        Task,
+        on_delete=models.CASCADE,
+        related_name="solutions",
+        verbose_name="Задача",
+    )
+
+    answer = models.TextField(
+        verbose_name="Решение кандидата (код/ответ)",
+        help_text="То, что написал кандидат",
+    )
+
+    language = models.CharField(
+        max_length=50,
+        verbose_name="Язык программирования",
+        default="python",
+        help_text="Например: python, js, c++, java и т.д.",
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.PENDING,
+        verbose_name="Статус проверки",
+    )
+
+    passed_tests = models.IntegerField(
+        default=0,
+        verbose_name="Пройдено тестов",
+    )
+
+    failed_tests = models.IntegerField(
+        default=0,
+        verbose_name="Провалено тестов",
+    )
+
+    score = models.FloatField(
+        null=True,
+        blank=True,
+        verbose_name="Баллы за задачу",
+        help_text="Можно вычислять на основе результатов",
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Создано",
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name="Обновлено",
+    )
+
+    class Meta:
+        verbose_name = "Решение задачи"
+        verbose_name_plural = "Решения задач"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"Решение {self.task.title} (собес: {self.interview.id})"
+
+    @property
+    def total_tests(self) -> int:
+        return self.passed_tests + self.failed_tests
+
+    @property
+    def is_all_passed(self) -> bool:
+        return self.total_tests > 0 and self.total_tests == self.passed_tests

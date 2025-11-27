@@ -1254,3 +1254,49 @@ main button:hover {
 .button_enter_neiro_add {
     display: block;
 }
+
+/* Второй блок с ide */
+.second_main{
+display: flex;
+flex-direction: row;
+justify-content: center !important;
+width: 100% !important;
+}
+.second_base{
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+
+}
+.second_textarea{
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.second_textarea p{
+    font-weight: 500;
+    font-size: 20px;
+    color: black;
+}
+.second_textarea span{
+    color: #1DAFF7;
+    font-size: 20px;
+    font-weight: 600;
+}
+/* кнопки */
+.ide_buttons{
+    width: 100%;
+            align-items: center;
+            display: flex;
+            justify-content: space-between;
+            padding-left: 20px;
+            padding-right: 20px;
+            flex-direction: row;
+            margin-bottom: 15px;
+}
+.button_enter_ide{
+    border-radius: 10px !important;
+            width: 230px !important;
+            height: 62px !important;
+            font-size: 20px !important;
+}
